@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gold Price Forecast Tool</title>
+  <style>
+    body {
+      background-image: url("/static/gold-bg.jpg");
+      background-size: cover;
+      background-position: center;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      text-align: center;
+      padding-top: 50px;
+    }
+    form {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-bottom: 30px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      width: 300px;
+      font-size: 16px;
+    }
+    table {
+      margin: auto;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      border-collapse: collapse;
+      width: 80%;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+    }
+    #result-table {
+      margin-top: 30px;
+    }
+    #error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📈 Gold Price Analysis Tool</h1>
+  <form id="goldForm">
+    <input type="file" name="file" id="fileInput" required><br>
+    <input type="text" name="prompt" id="promptInput" placeholder="e.g. forecast next month gold price" required><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="error"></div>
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById('goldForm');
+    const resultDiv = document.getElementById('result');
+    const errorDiv = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.textContent = '';
+      resultDiv.innerHTML = 'Loading...';
+
+      const formData = new FormData();
+      formData.append('file', document.getElementById('fileInput').files[0]);
+      formData.append('prompt', document.getElementById('promptInput').value);
+
+      const response = await fetch('/query/', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        resultDiv.innerHTML = '';
+        errorDiv.textContent = data.error;
+        return;
+      }
+
+      if (typeof data.result === 'number') {
+        resultDiv.innerHTML = `<h2>7-Day Average Price: ₹${data.result} / gram</h2>`;
+      } else if (Array.isArray(data.result)) {
+        let table = `<table id="result-table"><thead><tr><th>Date</th><th>Forecasted Price per gram (₹)</th></tr></thead><tbody>`;
+        data.result.forEach(row => {
+          table += `<tr><td>${row.Date}</td><td>${row["Forecasted Price per gram"]}</td></tr>`;
+        });
+        table += '</tbody></table>';
+        resultDiv.innerHTML = table;
+      } else {
+        resultDiv.innerHTML = `<p>${JSON.stringify(data.result)}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
