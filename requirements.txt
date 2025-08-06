@@ -6,4 +6,5 @@ python-dotenv
 openai
 python-multipart
 gunicorn
+jinja2
 
