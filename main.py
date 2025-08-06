@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, UploadFile, Form
 import pandas as pd
 import numpy as np
+import os
 import time
 from datetime import timedelta
 from sklearn.linear_model import LinearRegression
@@ -113,3 +114,4 @@ def forecast_next_month(df):
     future_days['Forecasted Price per gram'] = model.predict(future_days[['Day_Index']]).round(2)
 
     return future_days[['Date', 'Forecasted Price per gram']]
+
